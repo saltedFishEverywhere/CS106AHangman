@@ -1,0 +1,92 @@
+import acm.graphics.GLabel;
+import acm.program.ConsoleProgram;
+import acm.util.RandomGenerator;
+
+public class HangMan extends ConsoleProgram {
+    public void run(){
+        println("Welcome to Hangman!");
+        canvas.reset();
+
+        /*guess loop*/
+        while(true){
+
+            /*Console Intro*/
+            println("The word now looks like this: " + wordLook +"\n");
+            println("You have " + guessLeft +" guess left");
+
+
+
+            /*user input*/
+            String userInput = readLine("Your guess");
+            while(userInput.length()>=2 || !Character.isLetter(userInput.charAt(0))){
+                userInput = readLine("Your guess is illegal, please give a letter");
+            }
+            char guess = Character.toUpperCase(userInput.charAt(0)) ;
+
+            /*check to see if guess is in wordlook and answer*/
+            if(charIsInString(guess,answer) && !charIsInString(guess,wordLook)){
+                println("Your guess is correct!");
+            }else if(!charIsInString(guess,answer)){
+                println("There are no " + guess + " in the word.");
+                canvas.noteIncorrectGuess(guess);
+                guessLeft --;
+            }
+
+            /*update the wordLook*/
+            for(int i = 0;i <answer.length();i++){
+                if(guess == answer.charAt(i)){
+                    wordLook = wordLook.substring(0,i)+guess+wordLook.substring(i+1);
+                }
+            }
+
+            /*Update word drawing*/
+            canvas.displayWord(wordLook);
+
+            /*check & end game*/
+            if(wordLook.equals(answer)){
+                println("You guessed the word: "+answer+"\n" +"You win!" );
+                break;
+            }else if(guessLeft <=0){
+                println("You are completely hung." +"\n"+"The word was: "+answer+"\n"+"You loose.");
+                canvas.add(new GLabel(answer,18,450));
+                break;
+            }
+
+        }
+    }
+
+    public void init() {
+        canvas = new HangmanCanvas();
+        add(canvas);
+    }
+
+    private String turnAnswerToDash(String input){
+        String result = "";
+        for(int index = 0; index < answer.length();index++ ){
+            result += "-";
+        }
+        return result;
+    }
+
+    private Boolean charIsInString(char a, String b){
+        for(int i = 0; i < b.length();i++){
+            if(a == b.charAt(i)){
+                return Boolean.TRUE;
+            }
+        }
+        return Boolean.FALSE;
+    }
+
+    /* new objects*/
+    private HangmanLexicon hangMan1 = new HangmanLexicon();
+    private RandomGenerator rgen = new RandomGenerator();
+
+    /*instance variables*/
+    private String answer = hangMan1.getWord(rgen.nextInt(0,hangMan1.getWordCount()));
+    private String dashedAnswer = turnAnswerToDash(answer);
+    private int guessLeft = 8;
+    private String wordLook = dashedAnswer;
+
+    private HangmanCanvas canvas;
+
+}
